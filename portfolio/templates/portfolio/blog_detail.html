@@ -1,0 +1,88 @@
+{% extends 'portfolio/base.html' %}
+{% load markdownify %}
+{% block title %}{{ post.title }}{% if profile %} — {{ profile.full_name }}{% endif %}{% endblock %}
+{% block og_title %}{{ post.title }}{% endblock %}
+{% block meta_desc %}{{ post.excerpt }}{% endblock %}
+{% block nav_blog %}active{% endblock %}
+{% block nav_blog_m %}active{% endblock %}
+
+{% block extra_styles %}
+.post-header { padding: 4rem 0 3rem; border-bottom: 1px solid var(--border); }
+.breadcrumb { display: flex; align-items: center; gap: .5rem; font-size: .82rem; color: var(--text-muted); margin-bottom: 1.25rem; list-style: none; padding: 0; }
+.breadcrumb a { color: var(--text-muted); }
+.breadcrumb a:hover { color: var(--primary); text-decoration: none; }
+.post-content {
+  color: var(--text); line-height: 1.9; font-size: 1.05rem;
+}
+.post-content h1,.post-content h2,.post-content h3 { color: var(--text); margin: 2rem 0 .75rem; font-weight: 700; }
+.post-content h2 { font-size: 1.4rem; }
+.post-content h3 { font-size: 1.15rem; }
+.post-content p { margin-bottom: 1.25rem; }
+.post-content a { color: var(--primary); }
+.post-content ul, .post-content ol { padding-left: 1.5rem; margin-bottom: 1.25rem; }
+.post-content li { margin-bottom: .4rem; }
+.post-content code { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: .15rem .4rem; font-family: 'JetBrains Mono', monospace; font-size: .88em; color: var(--primary); }
+.post-content pre { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; overflow-x: auto; margin-bottom: 1.5rem; }
+.post-content pre code { background: none; border: none; padding: 0; font-size: .88rem; color: var(--text); }
+.post-content blockquote { border-left: 3px solid var(--primary); padding-left: 1.25rem; color: var(--text-muted); font-style: italic; margin: 1.5rem 0; }
+.post-content img { border-radius: 10px; border: 1px solid var(--border); margin: 1.5rem 0; }
+.cover-img { width: 100%; max-height: 420px; object-fit: cover; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 2.5rem; }
+{% endblock %}
+
+{% block content %}
+<div class="post-header">
+  <div class="container-sm">
+    <ol class="breadcrumb">
+      <li><a href="{% url 'home' %}">Home</a></li>
+      <li style="color:var(--border);">/</li>
+      <li><a href="{% url 'blog' %}">Blog</a></li>
+      <li style="color:var(--border);">/</li>
+      <li style="color:var(--text);">{{ post.title|truncatechars:40 }}</li>
+    </ol>
+    <div class="flex-gap mb-3">
+      {% if post.category %}<span class="badge badge-blue">{{ post.category }}</span>{% endif %}
+      <span style="font-size:.8rem;color:var(--text-subtle);">{{ post.created_at|date:"F j, Y" }}</span>
+      <span style="font-size:.8rem;color:var(--text-subtle);">· {{ post.reading_time }}</span>
+    </div>
+    <h1 class="h1" style="font-size:clamp(1.8rem,4vw,3rem);">{{ post.title }}</h1>
+    <p class="lead mt-2">{{ post.excerpt }}</p>
+  </div>
+</div>
+
+<section class="section-sm">
+  <div class="container-sm">
+    {% if post.cover %}
+    <img src="{{ post.cover.url }}" alt="{{ post.title }}" class="cover-img" />
+    {% endif %}
+    <div class="post-content">
+      {{ post.content|markdownify }}
+    </div>
+
+    <div class="divider" style="margin:3rem 0;"></div>
+    <div class="flex-between flex-wrap" style="gap:.75rem;">
+      <a href="{% url 'blog' %}" class="btn btn-outline"><i class="bi bi-arrow-left"></i> All Posts</a>
+      {% if profile %}
+      <div style="display:flex;align-items:center;gap:.75rem;font-size:.85rem;color:var(--text-muted);">
+        Written by <strong style="color:var(--text);">{{ profile.full_name }}</strong>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if related %}
+    <div class="divider" style="margin:3rem 0 2rem;"></div>
+    <h3 class="h3 mb-3">More Posts</h3>
+    <div class="grid-3">
+      {% for p in related %}
+      <a href="{% url 'blog_detail' p.slug %}" class="card reveal" style="text-decoration:none;color:inherit;transition-delay:{{ forloop.counter0 }}00ms;">
+        <div class="card-body">
+          <div style="font-size:.72rem;color:var(--text-subtle);margin-bottom:.4rem;">{{ p.created_at|date:"M j, Y" }} · {{ p.reading_time }}</div>
+          <div style="font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:.4rem;">{{ p.title }}</div>
+          <p style="font-size:.82rem;color:var(--text-muted);">{{ p.excerpt|truncatechars:80 }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

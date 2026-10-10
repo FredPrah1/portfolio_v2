@@ -1,0 +1,363 @@
+{% extends 'portfolio/base.html' %}
+{% block title %}{% if profile %}{{ profile.full_name }} — {{ profile.title }}{% else %}Portfolio{% endif %}{% endblock %}
+{% block nav_home %}active{% endblock %}
+{% block nav_home_m %}active{% endblock %}
+
+{% block extra_styles %}
+.hero {
+  min-height: calc(100vh - 64px);
+  display: flex; align-items: center;
+  position: relative; overflow: hidden;
+  padding: 4rem 0;
+}
+.hero-glow {
+  position: absolute; pointer-events: none;
+  width: 700px; height: 700px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(88,166,255,.07) 0%, transparent 65%);
+  top: -150px; right: -200px;
+}
+.hero-glow-2 {
+  position: absolute; pointer-events: none;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(63,185,80,.05) 0%, transparent 65%);
+  bottom: 0; left: -150px;
+}
+.hero-col { display: flex; flex-direction: column; justify-content: center; }
+.hero-avail {
+  display: inline-flex; align-items: center; gap: .5rem;
+  background: var(--green-dim); border: 1px solid rgba(63,185,80,.25);
+  color: var(--green); border-radius: 20px;
+  padding: .3rem .9rem; font-size: .78rem; font-weight: 600;
+  margin-bottom: 1.5rem; width: fit-content;
+}
+.hero-name { font-size: clamp(2.8rem, 6vw, 5rem); font-weight: 800; line-height: 1.05; color: var(--text); }
+.hero-name .hi { color: var(--text-muted); font-weight: 400; font-size: .6em; display: block; margin-bottom: .2rem; }
+.hero-title { font-size: 1.2rem; color: var(--primary); font-weight: 500; margin: .75rem 0 1.25rem; }
+.hero-bio { color: var(--text-muted); line-height: 1.8; max-width: 520px; font-size: 1rem; }
+.hero-actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 2rem; }
+.hero-socials { display: flex; gap: .75rem; margin-top: 1.75rem; }
+.hero-social-link {
+  width: 38px; height: 38px; border-radius: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); font-size: 1rem;
+  transition: all .2s;
+}
+.hero-social-link:hover { color: var(--primary); border-color: var(--primary); background: var(--primary-dim); text-decoration: none; }
+.hero-img-wrap {
+  display: flex; align-items: center; justify-content: center;
+}
+.hero-photo-ring {
+  width: 280px; height: 280px; border-radius: 24px;
+  position: relative;
+}
+.hero-photo-ring::before {
+  content: '';
+  position: absolute; inset: -2px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, var(--primary), var(--green));
+  z-index: 0;
+}
+.hero-photo-ring img,
+.hero-photo-placeholder {
+  position: relative; z-index: 1;
+  width: 100%; height: 100%;
+  border-radius: 22px;
+  object-fit: cover;
+}
+.hero-photo-placeholder {
+  background: var(--surface);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .5rem; color: var(--text-muted); font-size: .8rem;
+}
+.hero-photo-placeholder i { font-size: 3rem; color: var(--primary); opacity: .4; }
+.stat-row { display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 2.5rem; }
+.stat-item { text-align: center; }
+.stat-num { font-size: 2rem; font-weight: 800; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+.stat-lbl { font-size: .75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; }
+.hero-right { display: flex; flex-direction: column; align-items: center; gap: 2rem; }
+
+/* Section: Services */
+.service-card { padding: 1.75rem; }
+.service-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: var(--primary-dim); border: 1px solid rgba(88,166,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; color: var(--primary); margin-bottom: 1rem;
+}
+.service-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: .5rem; }
+.service-card p { font-size: .875rem; color: var(--text-muted); line-height: 1.65; }
+
+/* Section: Projects */
+.proj-card { display: flex; flex-direction: column; }
+.proj-img { height: 180px; background: var(--surface); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.proj-img img { width: 100%; height: 100%; object-fit: cover; }
+.proj-img-placeholder { color: var(--text-subtle); font-size: 2.5rem; }
+.proj-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
+.proj-title { font-weight: 700; font-size: 1rem; margin-bottom: .4rem; color: var(--text); }
+.proj-desc { font-size: .85rem; color: var(--text-muted); line-height: 1.6; flex: 1; margin-bottom: .85rem; }
+.proj-tags { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: 1rem; }
+.proj-links { display: flex; gap: .5rem; margin-top: auto; }
+
+/* Section: Blog */
+.post-card { padding: 1.5rem; display: flex; flex-direction: column; }
+.post-cover { height: 160px; border-radius: 8px; overflow: hidden; margin-bottom: 1rem; background: var(--surface); display: flex; align-items: center; justify-content: center; }
+.post-cover img { width: 100%; height: 100%; object-fit: cover; }
+.post-meta { font-size: .75rem; color: var(--text-subtle); margin-bottom: .4rem; display: flex; align-items: center; gap: .5rem; }
+.post-title { font-size: 1rem; font-weight: 600; margin-bottom: .4rem; }
+.post-excerpt { font-size: .85rem; color: var(--text-muted); line-height: 1.6; flex: 1; }
+
+.hero-grid { display: grid; grid-template-columns: 1fr auto; gap: 4rem; align-items: center; }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+
+@media (max-width: 768px) {
+  .hero { padding: 3rem 0 2rem; min-height: auto; }
+  .hero-grid { grid-template-columns: 1fr; gap: 2.5rem; text-align: center; }
+  .hero-actions, .hero-socials { justify-content: center; }
+  .stat-row { justify-content: center; }
+  .hero-img-wrap { margin-top: 0; order: -1; }
+  .hero-photo-ring { width: 200px; height: 200px; }
+  .stat-row { gap: 1.25rem; }
+  .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+}
+{% endblock %}
+
+{% block content %}
+
+<!-- ════════════════════ HERO ════════════════════ -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow-2"></div>
+  <div class="container">
+    <div class="hero-grid">
+
+      <div class="hero-col reveal">
+        {% if profile %}
+          {% if profile.availability %}
+          <div class="hero-avail">
+            <span style="width:7px;height:7px;background:var(--green);border-radius:50%;"></span>
+            {{ profile.availability }}
+          </div>
+          {% endif %}
+
+          <h1 class="hero-name">
+            <span class="hi">Hi, I'm</span>
+            {{ profile.full_name }}
+          </h1>
+          {% if profile.title %}
+          <div class="hero-title">{{ profile.title }}</div>
+          {% endif %}
+          {% if profile.tagline %}
+          <p class="hero-bio">{{ profile.tagline }}</p>
+          {% endif %}
+
+          <div class="hero-actions">
+            <a href="{% url 'projects' %}" class="btn btn-primary btn-lg">
+              <i class="bi bi-grid-3x3-gap"></i> View Projects
+            </a>
+            <a href="{% url 'contact' %}" class="btn btn-outline btn-lg">
+              <i class="bi bi-envelope"></i> Get In Touch
+            </a>
+          </div>
+
+          <div class="hero-socials">
+            {% if profile.github_url   %}<a href="{{ profile.github_url }}"   target="_blank" class="hero-social-link"><i class="bi bi-github"></i></a>{% endif %}
+            {% if profile.linkedin_url %}<a href="{{ profile.linkedin_url }}" target="_blank" class="hero-social-link"><i class="bi bi-linkedin"></i></a>{% endif %}
+            {% if profile.twitter_url  %}<a href="{{ profile.twitter_url }}"  target="_blank" class="hero-social-link"><i class="bi bi-twitter-x"></i></a>{% endif %}
+            {% if profile.email        %}<a href="mailto:{{ profile.email }}" class="hero-social-link"><i class="bi bi-envelope"></i></a>{% endif %}
+          </div>
+
+          {% if profile.years_experience or profile.projects_count or profile.clients_count %}
+          <div class="stat-row">
+            {% if profile.years_experience %}<div class="stat-item"><div class="stat-num">{{ profile.years_experience }}+</div><div class="stat-lbl">Years Exp.</div></div>{% endif %}
+            {% if profile.projects_count   %}<div class="stat-item"><div class="stat-num">{{ profile.projects_count }}+</div><div class="stat-lbl">Projects</div></div>{% endif %}
+            {% if profile.clients_count    %}<div class="stat-item"><div class="stat-num">{{ profile.clients_count }}+</div><div class="stat-lbl">Clients</div></div>{% endif %}
+          </div>
+          {% endif %}
+
+        {% else %}
+        <h1 class="hero-name">Welcome to My Portfolio</h1>
+        <p class="hero-bio" style="margin-top:1rem;">Set up your profile in the admin panel to personalise this page.</p>
+        {% endif %}
+      </div>
+
+      <div class="hero-img-wrap reveal" style="transition-delay:.15s;">
+        <div class="hero-photo-ring">
+          {% if profile and profile.profile_photo %}
+          <img src="{{ profile.profile_photo.url }}" alt="{{ profile.full_name }}" />
+          {% else %}
+          <div class="hero-photo-placeholder">
+            <i class="bi bi-person-fill"></i>
+            <span>Add photo in admin</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════════════════════ ABOUT ════════════════════ -->
+{% if profile and profile.bio %}
+<section class="section">
+  <div class="container">
+    <div class="about-grid">
+      <div class="reveal">
+        <span class="label">About Me</span>
+        <h2 class="h2 mb-3">The person behind the <span class="highlight">code</span></h2>
+        <p class="lead mb-2">{{ profile.bio }}</p>
+        {% if profile.bio_extra %}<p class="muted" style="line-height:1.8;">{{ profile.bio_extra }}</p>{% endif %}
+        {% if profile.resume_file %}
+        <div class="mt-4">
+          <a href="{{ profile.resume_file.url }}" class="btn btn-outline" download>
+            <i class="bi bi-file-earmark-person"></i> Download Resume
+          </a>
+        </div>
+        {% endif %}
+      </div>
+      <div class="reveal skills-block" style="transition-delay:.1s;">
+        <span class="label">Skills</span>
+        {% for category, skill_list in skills_by_category.items %}
+        <div class="mb-3">
+          <p style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-subtle);margin-bottom:.75rem;">{{ category }}</p>
+          {% for skill in skill_list %}
+          <div class="skill-row">
+            <div class="skill-row-top">
+              <span style="font-weight:500;font-size:.83rem;">{{ skill.name }}</span>
+              <span class="mono" style="color:var(--primary);font-size:.78rem;">{{ skill.proficiency }}%</span>
+            </div>
+            <div class="skill-track"><div class="skill-fill" data-w="{{ skill.proficiency }}%"></div></div>
+          </div>
+          {% endfor %}
+        </div>
+        {% empty %}
+        <p class="muted" style="font-size:.85rem;">Add skills in the admin panel.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+{% endif %}
+
+<!-- ════════════════════ SERVICES ════════════════════ -->
+{% if services %}
+<section class="section" style="background:var(--surface);">
+  <div class="container">
+    <div class="text-center mb-4 reveal">
+      <span class="label">What I Do</span>
+      <h2 class="h2">Services I <span class="highlight">offer</span></h2>
+    </div>
+    <div class="grid-3">
+      {% for s in services %}
+      <div class="card service-card reveal" style="transition-delay:{{ forloop.counter0 }}00ms;">
+        <div class="service-icon"><i class="{{ s.icon }}"></i></div>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.description }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+{% endif %}
+
+<!-- ════════════════════ FEATURED PROJECTS ════════════════════ -->
+{% if featured_projects %}
+<section class="section">
+  <div class="container">
+    <div class="flex-between mb-4 reveal">
+      <div>
+        <span class="label">Portfolio</span>
+        <h2 class="h2">Featured <span class="highlight">Projects</span></h2>
+      </div>
+      <a href="{% url 'projects' %}" class="btn btn-ghost">All projects <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="grid-3">
+      {% for project in featured_projects %}
+      <div class="card proj-card reveal" style="transition-delay:{{ forloop.counter0 }}00ms;">
+        <div class="proj-img">
+          {% if project.image %}
+          <img src="{{ project.image.url }}" alt="{{ project.title }}" />
+          {% else %}
+          <i class="bi bi-window-stack proj-img-placeholder"></i>
+          {% endif %}
+        </div>
+        <div class="proj-body">
+          <div class="flex-between mb-2">
+            <div class="proj-title">{{ project.title }}</div>
+            <span class="badge {% if project.status == 'completed' %}badge-green{% elif project.status == 'in_progress' %}badge-orange{% else %}badge-gray{% endif %}">
+              {{ project.get_status_display }}
+            </span>
+          </div>
+          <p class="proj-desc">{{ project.short_description|truncatechars:110 }}</p>
+          <div class="proj-tags">
+            {% for tech in project.get_tech_list %}
+            <span class="badge badge-blue">{{ tech }}</span>
+            {% endfor %}
+          </div>
+          <div class="proj-links">
+            <a href="{% url 'project_detail' project.slug %}" class="btn btn-primary btn-sm" style="flex:1;">Details</a>
+            {% if project.github_url %}<a href="{{ project.github_url }}" target="_blank" class="btn btn-outline btn-sm"><i class="bi bi-github"></i></a>{% endif %}
+            {% if project.live_url   %}<a href="{{ project.live_url }}"   target="_blank" class="btn btn-outline btn-sm"><i class="bi bi-box-arrow-up-right"></i></a>{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+{% endif %}
+
+<!-- ════════════════════ LATEST POSTS ════════════════════ -->
+{% if latest_posts %}
+<section class="section" style="background:var(--surface);">
+  <div class="container">
+    <div class="flex-between mb-4 reveal">
+      <div>
+        <span class="label">Writing</span>
+        <h2 class="h2">Latest <span class="highlight">Posts</span></h2>
+      </div>
+      <a href="{% url 'blog' %}" class="btn btn-ghost">All posts <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="grid-3">
+      {% for post in latest_posts %}
+      <a href="{% url 'blog_detail' post.slug %}" class="card post-card reveal" style="text-decoration:none;transition-delay:{{ forloop.counter0 }}00ms;">
+        {% if post.cover %}
+        <div class="post-cover"><img src="{{ post.cover.url }}" alt="{{ post.title }}" /></div>
+        {% endif %}
+        <div class="post-meta">
+          {% if post.category %}<span class="badge badge-blue">{{ post.category }}</span>{% endif %}
+          <span>{{ post.created_at|date:"M j, Y" }}</span>
+          <span>· {{ post.reading_time }}</span>
+        </div>
+        <div class="post-title">{{ post.title }}</div>
+        <p class="post-excerpt">{{ post.excerpt|truncatechars:100 }}</p>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+{% endif %}
+
+<!-- ════════════════════ CTA ════════════════════ -->
+<section class="section">
+  <div class="container-sm text-center reveal">
+    <span class="label">Let's Connect</span>
+    <h2 class="h2 mb-2">Have a project in <span class="highlight">mind?</span></h2>
+    <p class="lead mb-4">I'm always open to interesting work, collaborations, or just a good tech conversation.</p>
+    <div style="display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap;">
+      <a href="{% url 'contact' %}" class="btn btn-primary btn-lg"><i class="bi bi-send"></i> Get in Touch</a>
+      {% if profile and profile.resume_file %}
+      <a href="{{ profile.resume_file.url }}" class="btn btn-outline btn-lg" download><i class="bi bi-download"></i> Download CV</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

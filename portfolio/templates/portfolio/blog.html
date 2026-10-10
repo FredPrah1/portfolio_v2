@@ -1,0 +1,98 @@
+{% extends 'portfolio/base.html' %}
+{% block title %}Blog{% if profile %} — {{ profile.full_name }}{% endif %}{% endblock %}
+{% block nav_blog %}active{% endblock %}
+{% block nav_blog_m %}active{% endblock %}
+
+{% block extra_styles %}
+.post-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+@media (max-width: 1024px) { .post-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .post-grid { grid-template-columns: 1fr; } }
+.post-card-link { text-decoration: none; color: inherit; display: flex; flex-direction: column; height: 100%; }
+.post-card-link:hover { text-decoration: none; }
+.post-card-link .card { height: 100%; display: flex; flex-direction: column; }
+.post-cover { height: 180px; overflow: hidden; background: var(--surface); display: flex; align-items: center; justify-content: center; }
+.post-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+.post-card-link:hover .post-cover img { transform: scale(1.04); }
+.post-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
+.post-meta { font-size: .75rem; color: var(--text-subtle); display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.post-title { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: .5rem; line-height: 1.4; }
+.post-excerpt { font-size: .85rem; color: var(--text-muted); line-height: 1.65; flex: 1; }
+.empty { text-align: center; padding: 5rem 0; color: var(--text-muted); }
+.empty i { font-size: 3rem; opacity: .2; display: block; margin-bottom: 1rem; }
+{% endblock %}
+
+{% block content %}
+<div style="padding:4rem 0 3rem;border-bottom:1px solid var(--border);">
+  <div class="container">
+    <span class="label">Writing</span>
+    <h1 class="h1">The <span class="highlight">Blog</span></h1>
+    <p class="lead mt-2">Thoughts, tutorials, and notes on building software.</p>
+  </div>
+</div>
+
+<section class="section-sm">
+  <div class="container">
+    {% if categories %}
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem;">
+      <a href="{% url 'blog' %}" class="filter-btn {% if not active_cat %}active{% endif %}" style="padding:.35rem 1rem;border-radius:20px;font-size:.8rem;font-weight:500;border:1px solid var(--border);color:var(--text-muted);background:transparent;text-decoration:none;transition:all .2s;">All</a>
+      {% for cat in categories %}
+      <a href="?cat={{ cat.slug }}" class="filter-btn {% if active_cat == cat.slug %}active{% endif %}" style="padding:.35rem 1rem;border-radius:20px;font-size:.8rem;font-weight:500;border:1px solid var(--border);color:var(--text-muted);background:transparent;text-decoration:none;transition:all .2s;">{{ cat.name }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if posts %}
+    <div class="post-grid">
+      {% for post in posts %}
+      <a href="{% url 'blog_detail' post.slug %}" class="post-card-link reveal" style="transition-delay:{{ forloop.counter0 }}0ms;">
+        <div class="card">
+          {% if post.cover %}
+          <div class="post-cover"><img src="{{ post.cover.url }}" alt="{{ post.title }}" /></div>
+          {% else %}
+          <div class="post-cover"><i class="bi bi-journal-text" style="font-size:2rem;color:var(--text-subtle);opacity:.3;"></i></div>
+          {% endif %}
+          <div class="post-body">
+            <div class="post-meta">
+              {% if post.category %}<span class="badge badge-blue">{{ post.category }}</span>{% endif %}
+              <span>{{ post.created_at|date:"M j, Y" }}</span>
+              <span>· {{ post.reading_time }}</span>
+            </div>
+            <div class="post-title">{{ post.title }}</div>
+            <p class="post-excerpt">{{ post.excerpt|truncatechars:120 }}</p>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="empty">
+      <i class="bi bi-journal-x"></i>
+      <h5>No posts yet</h5>
+      <p>{% if active_cat %}No posts in this category. <a href="{% url 'blog' %}">Show all</a>{% else %}Check back soon — posts coming!{% endif %}</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('mouseenter', function() {
+    if (!this.classList.contains('active')) {
+      this.style.background = 'var(--primary-dim)';
+      this.style.borderColor = 'var(--primary)';
+      this.style.color = 'var(--primary)';
+    }
+  });
+  btn.addEventListener('mouseleave', function() {
+    if (!this.classList.contains('active')) {
+      this.style.background = 'transparent';
+      this.style.borderColor = 'var(--border)';
+      this.style.color = 'var(--text-muted)';
+    }
+  });
+});
+</script>
+{% endblock %}

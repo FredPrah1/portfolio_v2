@@ -1,0 +1,134 @@
+{% extends 'portfolio/base.html' %}
+{% block title %}Contact{% if profile %} — {{ profile.full_name }}{% endif %}{% endblock %}
+{% block nav_contact %}active{% endblock %}
+{% block nav_contact_m %}active{% endblock %}
+
+{% block extra_styles %}
+.contact-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 4rem; align-items: start; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 768px) {
+  .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .form-row { grid-template-columns: 1fr; }
+}
+.info-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1.1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: .75rem; transition: border-color .2s; }
+.info-item:hover { border-color: var(--primary); }
+.info-icon { width: 42px; height: 42px; border-radius: 10px; background: var(--primary-dim); border: 1px solid rgba(88,166,255,.2); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--primary); flex-shrink: 0; }
+.info-key { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-subtle); margin-bottom: .2rem; }
+.info-val { font-size: .9rem; color: var(--text); }
+.info-val a { color: var(--text); text-decoration: none; }
+.info-val a:hover { color: var(--primary); }
+.form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; }
+.form-group { margin-bottom: 1.25rem; }
+.form-label { display: block; font-size: .82rem; font-weight: 500; color: var(--text-muted); margin-bottom: .4rem; }
+.form-input {
+  width: 100%; background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: .65rem .9rem;
+  color: var(--text); font-size: .9rem; font-family: inherit;
+  outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(88,166,255,.12); }
+.form-input::placeholder { color: var(--text-subtle); }
+textarea.form-input { resize: vertical; min-height: 140px; }
+.form-error { font-size: .78rem; color: var(--red); margin-top: .3rem; }
+.social-row { display: flex; gap: .5rem; margin-top: 1.5rem; }
+.social-btn { width: 40px; height: 40px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 1.1rem; transition: all .2s; text-decoration: none; }
+.social-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); text-decoration: none; }
+{% endblock %}
+
+{% block content %}
+<div style="padding:4rem 0 3rem;border-bottom:1px solid var(--border);">
+  <div class="container">
+    <span class="label">Contact</span>
+    <h1 class="h1">Let's <span class="highlight">Talk</span></h1>
+    <p class="lead mt-2">Have a project, opportunity, or just want to say hi? I'd love to hear from you.</p>
+  </div>
+</div>
+
+<section class="section-sm">
+  <div class="container">
+    <div class="contact-grid">
+
+      <!-- Contact info -->
+      <div class="reveal">
+        <h3 class="h3 mb-3">Get in Touch</h3>
+
+        {% if profile %}
+          {% if profile.email %}
+          <div class="info-item">
+            <div class="info-icon"><i class="bi bi-envelope"></i></div>
+            <div>
+              <div class="info-key">Email</div>
+              <div class="info-val"><a href="mailto:{{ profile.email }}">{{ profile.email }}</a></div>
+            </div>
+          </div>
+          {% endif %}
+          {% if profile.location %}
+          <div class="info-item">
+            <div class="info-icon"><i class="bi bi-geo-alt"></i></div>
+            <div>
+              <div class="info-key">Location</div>
+              <div class="info-val">{{ profile.location }}</div>
+            </div>
+          </div>
+          {% endif %}
+          {% if profile.availability %}
+          <div class="info-item">
+            <div class="info-icon"><i class="bi bi-calendar-check"></i></div>
+            <div>
+              <div class="info-key">Availability</div>
+              <div class="info-val" style="color:var(--green);">{{ profile.availability }}</div>
+            </div>
+          </div>
+          {% endif %}
+        {% else %}
+        <p class="muted" style="font-size:.875rem;">Add your contact info in the admin panel.</p>
+        {% endif %}
+
+        {% if profile %}
+        <div class="social-row">
+          {% if profile.github_url   %}<a href="{{ profile.github_url }}"   target="_blank" class="social-btn"><i class="bi bi-github"></i></a>{% endif %}
+          {% if profile.linkedin_url %}<a href="{{ profile.linkedin_url }}" target="_blank" class="social-btn"><i class="bi bi-linkedin"></i></a>{% endif %}
+          {% if profile.twitter_url  %}<a href="{{ profile.twitter_url }}"  target="_blank" class="social-btn"><i class="bi bi-twitter-x"></i></a>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Form -->
+      <div class="reveal" style="transition-delay:.1s;">
+        <div class="form-card">
+          <h3 class="h3 mb-3" style="font-size:1.1rem;">Send a Message</h3>
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="id_name">Name</label>
+                <input id="id_name" type="text" name="{{ form.name.html_name }}" value="{{ form.name.value|default:'' }}" class="form-input" placeholder="Your Name" />
+                {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="id_email">Email</label>
+                <input id="id_email" type="email" name="{{ form.email.html_name }}" value="{{ form.email.value|default:'' }}" class="form-input" placeholder="you@email.com" />
+                {% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="id_subject">Subject</label>
+              <input id="id_subject" type="text" name="{{ form.subject.html_name }}" value="{{ form.subject.value|default:'' }}" class="form-input" placeholder="What's this about?" />
+              {% if form.subject.errors %}<div class="form-error">{{ form.subject.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="id_message">Message</label>
+              <textarea id="id_message" name="{{ form.message.html_name }}" class="form-input" placeholder="Tell me about your project...">{{ form.message.value|default:'' }}</textarea>
+              {% if form.message.errors %}<div class="form-error">{{ form.message.errors.0 }}</div>{% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary w-full" style="justify-content:center;padding:.75rem;">
+              <i class="bi bi-send" aria-hidden="true"></i> Send Message
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endblock %}

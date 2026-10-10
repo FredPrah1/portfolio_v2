@@ -1,0 +1,137 @@
+{% extends 'portfolio/base.html' %}
+{% block title %}{{ project.title }}{% if profile %} — {{ profile.full_name }}{% endif %}{% endblock %}
+{% block og_title %}{{ project.title }}{% endblock %}
+{% block meta_desc %}{{ project.short_description }}{% endblock %}
+{% block nav_projects %}active{% endblock %}
+{% block nav_projects_m %}active{% endblock %}
+
+{% block extra_styles %}
+.detail-hero { padding: 4rem 0 3rem; border-bottom: 1px solid var(--border); }
+.breadcrumb { display: flex; align-items: center; gap: .5rem; font-size: .82rem; color: var(--text-muted); margin-bottom: 1.25rem; list-style: none; padding: 0; }
+.breadcrumb a { color: var(--text-muted); }
+.breadcrumb a:hover { color: var(--primary); }
+.breadcrumb-sep { color: var(--border); }
+.detail-image { width: 100%; border-radius: 12px; border: 1px solid var(--border); max-height: 440px; object-fit: cover; }
+.detail-placeholder { width: 100%; height: 320px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
+.sidebar-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; margin-bottom: 1rem; }
+.sidebar-row { margin-bottom: 1.1rem; }
+.sidebar-row:last-child { margin-bottom: 0; }
+.sidebar-key { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--text-subtle); margin-bottom: .3rem; }
+.sidebar-val { font-size: .9rem; color: var(--text); }
+.link-row { display: flex; align-items: center; gap: .75rem; padding: .7rem .9rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-size: .85rem; font-weight: 500; transition: all .2s; text-decoration: none; margin-bottom: .5rem; }
+.link-row:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); text-decoration: none; }
+.body-content { color: var(--text); line-height: 1.85; }
+.body-content p { margin-bottom: 1rem; }
+@media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr !important; } }
+{% endblock %}
+
+{% block content %}
+<div class="detail-hero">
+  <div class="container">
+    <ol class="breadcrumb">
+      <li><a href="{% url 'home' %}">Home</a></li>
+      <li class="breadcrumb-sep">/</li>
+      <li><a href="{% url 'projects' %}">Projects</a></li>
+      <li class="breadcrumb-sep">/</li>
+      <li style="color:var(--text);">{{ project.title }}</li>
+    </ol>
+    <div class="flex-gap">
+      <h1 class="h1" style="font-size:clamp(1.8rem,4vw,3rem);">{{ project.title }}</h1>
+      <span class="badge {% if project.status == 'completed' %}badge-green{% elif project.status == 'in_progress' %}badge-orange{% else %}badge-gray{% endif %}" style="font-size:.8rem;">
+        {{ project.get_status_display }}
+      </span>
+      {% if project.featured %}<span class="badge badge-blue">Featured</span>{% endif %}
+    </div>
+    {% if project.short_description %}
+    <p class="lead mt-2">{{ project.short_description }}</p>
+    {% endif %}
+  </div>
+</div>
+
+<section class="section-sm">
+  <div class="container">
+    <div class="detail-grid" style="display:grid;grid-template-columns:1fr 300px;gap:3rem;align-items:start;">
+
+      <!-- Main -->
+      <div>
+        {% if project.image %}
+        <img src="{{ project.image.url }}" alt="{{ project.title }}" class="detail-image mb-3" />
+        {% else %}
+        <div class="detail-placeholder mb-3">
+          <i class="bi bi-window-stack" style="font-size:3rem;color:var(--text-subtle);opacity:.3;"></i>
+        </div>
+        {% endif %}
+
+        <div class="body-content">{{ project.description|linebreaks }}</div>
+
+        {% if project.get_tech_list %}
+        <div style="margin-top:2rem;">
+          <p style="font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-subtle);margin-bottom:.6rem;">Tech Stack</p>
+          <div class="flex-gap">
+            {% for tech in project.get_tech_list %}<span class="badge badge-blue">{{ tech }}</span>{% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Sidebar -->
+      <div>
+        {% if project.github_url or project.live_url %}
+        <div class="sidebar-card">
+          <p style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-subtle);margin-bottom:.75rem;">Links</p>
+          {% if project.github_url %}
+          <a href="{{ project.github_url }}" target="_blank" class="link-row">
+            <i class="bi bi-github" style="font-size:1.1rem;"></i> View on GitHub
+          </a>
+          {% endif %}
+          {% if project.live_url %}
+          <a href="{{ project.live_url }}" target="_blank" class="link-row">
+            <i class="bi bi-box-arrow-up-right" style="font-size:1.1rem;"></i> Live Demo
+          </a>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="sidebar-card">
+          <p style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-subtle);margin-bottom:.75rem;">Details</p>
+          <div class="sidebar-row">
+            <div class="sidebar-key">Status</div>
+            <div class="sidebar-val">{{ project.get_status_display }}</div>
+          </div>
+          {% if project.category %}
+          <div class="sidebar-row">
+            <div class="sidebar-key">Category</div>
+            <div class="sidebar-val">{{ project.category }}</div>
+          </div>
+          {% endif %}
+          <div class="sidebar-row">
+            <div class="sidebar-key">Added</div>
+            <div class="sidebar-val">{{ project.created_at|date:"F Y" }}</div>
+          </div>
+        </div>
+
+        <a href="{% url 'projects' %}" class="btn btn-outline w-full" style="justify-content:center;">
+          <i class="bi bi-arrow-left"></i> All Projects
+        </a>
+      </div>
+    </div>
+
+    <!-- Related projects -->
+    {% if other_projects %}
+    <div class="divider" style="margin:3rem 0 2rem;"></div>
+    <h3 class="h3 mb-3">More Projects</h3>
+    <div class="grid-3">
+      {% for p in other_projects %}
+      <div class="card reveal" style="transition-delay:{{ forloop.counter0 }}00ms;">
+        <div class="card-body">
+          <div class="proj-title mb-2">{{ p.title }}</div>
+          <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem;">{{ p.short_description|truncatechars:80 }}</p>
+          <a href="{% url 'project_detail' p.slug %}" class="btn btn-outline btn-sm">View Project</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
